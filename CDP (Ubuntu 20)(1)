@@ -1,0 +1,81 @@
+********************************************************
+		Cloudera Data Platform
+********************************************************
+EC-2 
+AMI - ami-0e6b0a1f7f29fa192
+t2.large
+HDD -100-GB
+
+-----*** Update the server ***-----
+$ sudo apt-get update && sudo apt-get dist-upgrade -y
+
+
+-----*** Disable transparent huge pages ***-----
+
+$ sudo nano /etc/init.d/disable-transparent-hugepages
+
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides:          disable-transparent-hugepages
+# Required-Start:    $local_fs
+# Required-Stop:
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Disable Linux transparent huge pages
+# Description:       Disable Linux transparent huge pages, to improve
+#                    database performance.
+### END INIT INFO
+
+case $1 in
+  start)
+    if [ -d /sys/kernel/mm/transparent_hugepage ]; then
+      thp_path=/sys/kernel/mm/transparent_hugepage
+    elif [ -d /sys/kernel/mm/redhat_transparent_hugepage ]; then
+      thp_path=/sys/kernel/mm/redhat_transparent_hugepage
+    else
+      return 0
+    fi
+
+    echo 'never' > ${thp_path}/enabled
+    echo 'never' > ${thp_path}/defrag
+
+    unset thp_path
+    ;;
+esac
+
+$ sudo chmod 755 /etc/init.d/disable-transparent-hugepages 
+$ sudo update-rc.d disable-transparent-hugepages defaults
+
+>>Restart server
+
+
+-----*** Install NTP ***-----
+$ sudo apt-get install ntp -y 
+
+
+-----*** Set Swappiness ***-----
+sudo sysctl -a | grep vm.swappiness &&
+sudo sysctl vm.swappiness=1 &&
+echo 'vm.swappiness=1' | sudo tee --append /etc/sysctl.conf
+
+
+-----*** Install psycopg2 package ***-----
+
+$ sudo apt install python -y
+
+$ curl 'https://bootstrap.pypa.io/pip/2.7/get-pip.py' > get-pip.py && sudo python get-pip.py
+
+$ sudo pip install psycopg2==2.7.5 --ignore-installed
+# Create AMi And launch -- EC2
+
+
+# After AMI creation
+
+-----*** Install and start CM ***-----
+
+$ wget https://archive.cloudera.com/cm7/7.4.4/cloudera-manager-installer.bin
+
+$ chmod u+x cloudera-manager-installer.bin
+
+$ sudo ./cloudera-manager-installer.bin
+
