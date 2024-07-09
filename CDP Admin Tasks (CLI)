@@ -1,0 +1,122 @@
+*********************************************
+              CDP Admin tasks
+*********************************************
+
+
+# Safemode
+
+hdfs dfsadmin -safemode get
+
+-----***** Creating snapshots ****----
+
+hdfs dfsadmin -allowSnapshot /data
+
+hdfs dfs -createSnapshot /data snap1
+
+hdfs lsSnapshottableDir
+
+hdfs dfs -ls /data/.snapshot
+
+hdfs dfs -deleteSnapshot /data snap1
+
+hdfs dfsadmin -disallowSnapshot /data
+
+--> check snapshots on NN web UI
+
+
+-----**** Change ownerships ****-----
+
+hdfs dfs -chgrp group1 /data/abc
+
+hdfs dfs -chown testuser /data/abc
+
+hdfs dfs -chmod 700 /data/abc
+
+hdfs dfs -ls -R
+
+
+-----**** Configuring the HDFS quota ****-----
+
+wget https://raw.githubusercontent.com/tbertinmahieux/MSongsDB/master/Tasks_Demos/CoverSongs/shs_dataset_test.txt
+
+hdfs dfs -put shs_dataset_test.txt /data
+
+hdfs dfsadmin -setQuota 20 /data
+
+hdfs dfsadmin -setSpaceQuota ___ /data
+
+hdfs dfsadmin -clrQuota /data
+
+hdfs dfsadmin -clrSpaceQuota /data
+
+hdfs dfs -count -q /path/to/directory
+quota  rem_quota  space_quota  rem_space_quota  dir_count  file_count  size  file
+ none     inf        54975	    56897           3           8     786955 /u/ 
+
+
+-----*** Namenode metadata backup ****-----
+
+hdfs fsck /
+
+hdfs dfsadmin -report
+
+hdfs dfsadmin -report > report.txt
+
+hdfs dfsadmin -safemode enter
+
+hdfs dfsadmin -saveNamespace
+
+cd /dfs/nn
+
+cp -r current/ /var/lib/hadoop-hdfs/nnbackup
+
+
+----->>>> Leave safemode
+hdfs dfsadmin -safemode leave
+
+
+-----**** Filesystem check ****----
+
+hdfs fsck <path>
+hdfs fsck /
+
+## Options for fsck. To be given after path
+-delete					Delete corrupted files.
+-files					Print out files being checked.
+-files -blocks				Print out the block report
+-files -blocks -locations		Print out locations for every block.
+-includeSnapshots			Include snapshot data if the given path indicates a snapshottable directory or there are snapshottable 						directories under it.
+-list-corruptfileblocks			Print out list of missing blocks and files they belong to.
+-move					Move corrupted files to /lost+found.
+
+
+----**** Setting Replication for a dataset ----*****
+
+hdfs dfs -setrep -w 4 <file-name>
+
+
+-----**** Yarn Administration ****----
+
+## Submit inbuild hadoop jobs (Open 4 terminals and submit same job at a time)
+
+
+yarn jar /opt/cloudera/parcels/CDH/lib/hadoop-mapreduce/hadoop-mapreduce-examples.jar pi 20 500
+
+yarn application -list
+
+yarn application -list -appStates ALL
+
+##To get application ID use 
+
+yarn application -list
+
+yarn application -status application_1459542433815_0002
+
+## Kill an application
+
+yarn application -kill application_1459542433815_0002
+
+yarn logs -applicationId application_1459542433815_0002
+
+
+
